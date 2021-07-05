@@ -30,7 +30,7 @@ fi
 
 ROOT="$COMMON_DIR"/../../..
 
-HELPER="$ROOT"/vendor/lineage/build/tools/extract_utils.sh
+HELPER="$ROOT"/tools/extract-utils/extract_utils.sh
 if [ ! -f "$HELPER" ]; then
     echo "Unable to find helper script at $HELPER"
     exit 1
@@ -108,10 +108,6 @@ function blob_fixup() {
         sed -i "s|/system/etc/firmware|/vendor/firmware\x0\x0\x0\x0|g" "${2}"
         ;;
 
-    vendor/lib/hw/camera.sdm660.so)
-        "${PATCHELF}" --add-needed camera.sdm660_shim.so "${2}"
-        ;;
-
     vendor/lib64/libril-qc-hal-qmi.so)
         "${PATCHELF}" --replace-needed "libprotobuf-cpp-full.so" "libprotobuf-cpp-full-v29.so" "${2}"
         ;;
@@ -120,8 +116,63 @@ function blob_fixup() {
         "${PATCHELF}" --replace-needed "libprotobuf-cpp-lite.so" "libprotobuf-cpp-lite-v29.so" "${2}"
         ;;
 
+        vendor/lib/hw/camera.sdm660.so)
+            "${PATCHELF}" --replace-needed "libminikin.so" "libminikin-v28.so" "${2}"
+            ;;
+
+        vendor/lib/libarcsoft_beauty_shot.so)
+            "${PATCHELF}" --remove-needed "libandroid.so" "${2}"
+            ;;
+
+        vendor/lib/libFaceGrade.so)
+            "${PATCHELF}" --remove-needed "libandroid.so" "${2}"
+            ;;
+
+        vendor/lib/libMiCameraHal.so)
+            "${PATCHELF}" --replace-needed "libicuuc.so" "libicuuc-v28.so" "${2}"
+            "${PATCHELF}" --replace-needed "libminikin.so" "libminikin-v28.so" "${2}"
+            ;;
+
+        vendor/lib/libicuuc-v28.so)
+            "${PATCHELF}" --set-soname "libicuuc-v28.so" "${2}"
+            ;;
+
+        vendor/lib/libminikin-v28.so)
+            "${PATCHELF}" --set-soname "libminikin-v28.so" "${2}"
+            ;;
+
+        vendor/lib/libmmcamera2_stats_modules.so)
+            "${PATCHELF}" --remove-needed "libandroid.so" "${2}"
+            "${PATCHELF}" --remove-needed "libgui.so" "${2}"
+            ;;
+
+        vendor/lib/libmmcamera_jason_s5k3p8sp_sunny.so)
+            sed -i 's/\x1e\x40\x9a\x99\x99\x99\x99\x99\x3b\x40\x10/\x1e\x40\x9a\x99\x99\x99\x99\x99\x3b\x40\x01/' "${2}"
+            ;;
+
+        vendor/lib/libmmcamera_ppeiscore.so)
+            "${PATCHELF}" --remove-needed "libgui.so" "${2}"
+            ;;
+
+        vendor/lib/libmpbase.so)
+            "${PATCHELF}" --remove-needed "libandroid.so" "${2}"
+            ;;
+
+        vendor/lib/libVDClearShot.so)
+            "${PATCHELF}" --remove-needed "libandroid.so" "${2}"
+            ;;
+
     esac
+
+    device_blob_fixup "$@"
+
 }
+
+if ! typeset -f device_blob_fixup > /dev/null; then
+    device_blob_fixup() {
+        :
+    }
+fi
 
 # Initialize the common helper
 setup_vendor "$DEVICE_COMMON" "$VENDOR" "$ROOT" true $CLEAN_VENDOR
