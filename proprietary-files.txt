@@ -784,8 +784,8 @@ product/lib64/vendor.qti.hardware.sensorscalibrate@1.0.so|a6486bb8506902bbe2a4b7
 vendor/lib/sensor_calibrate.so|9f81f1bf43b7871555915c9d57bba16d0419af40
 vendor/lib64/sensor_calibrate.so|dacb7a77e1713a756a43c082329e9f42e2c0d40e
 
-# Soter - from LA.UM.8.2.r1-06200-sdm660.0
--app/SoterService/SoterService.apk|482523fabe02255e7ab6f80fbaaabe32c8fb3be9
+# Soter - from jason V12.0.1.0.PCHCNXM
+-app/SoterService/SoterService.apk|c6c6063f83588db6c572779624458a4d1f094213
 
 # Soter - from LA.UM.8.2.r1-07500-sdm660.0
 vendor/bin/hw/vendor.qti.hardware.soter@1.0-service|37f9501fa45a69ba3a27fd338704d76afc534bcb
