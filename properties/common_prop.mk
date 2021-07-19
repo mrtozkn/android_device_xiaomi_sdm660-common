@@ -175,15 +175,11 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.display.cabl=2 \
     vendor.display.enable_default_color_mode=1
 
-# DRM
-PRODUCT_PROPERTY_OVERRIDES += \
-    drm.service.enabled=true
-
 # GPS
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.backup.ntpServer="0.pool.ntp.org" \
     persist.vendor.overlay.izat.optin=rro
-    
+
 # Graphics
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.hardware.egl=adreno \
@@ -211,7 +207,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     vendor.mm.enable.qcom_parser=13631487 \
     vendor.video.disable.ubwc=1 \
     ro.media.recorder-max-base-layer-fps=60
-    
+
 # MISC
 PRODUCT_PROPERTY_OVERRIDES += \
     keyguard.no_require_sim=true \
