@@ -27,6 +27,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.vendor.audio.fluence.voicerec=false \
     persist.vendor.audio.hifi.int_codec=true \
     persist.vendor.audio.avs.afe_api_version=2 \
+    persist.vendor.audio.voicecall.speaker.stereo=true \
     ro.vendor.audio.sos=true \
     persist.vendor.audio.spv3.enable=true \
     persist.vendor.audio.hw.binder.size_kbyte=1024 \
