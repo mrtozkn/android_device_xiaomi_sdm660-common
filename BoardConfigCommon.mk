@@ -59,7 +59,6 @@ TARGET_USES_QTI_CAMERA_DEVICE := true
 TARGET_USES_HWC2 := true
 TARGET_USES_GRALLOC1 := true
 TARGET_USES_ION := true
-TARGET_USES_VULKAN := true
 
 # DT2W
 TARGET_TAP_TO_WAKE_NODE := "/sys/touchpanel/double_tap"
