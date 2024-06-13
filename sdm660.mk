@@ -70,6 +70,7 @@ PRODUCT_PACKAGES += \
     audio.r_submix.default \
     audio.usb.default \
     libaudio-resampler \
+    libaudioroute.vendor \
     libqcompostprocbundle \
     libqcomvisualizer \
     libqcomvoiceprocessing \
@@ -118,7 +119,8 @@ PRODUCT_PACKAGES += \
     android.hardware.camera.provider@2.5:64 \
     libdng_sdk.vendor \
     libgui_shim \
-    vendor.qti.hardware.camera.device@1.0:64
+    vendor.qti.hardware.camera.device@1.0:64 \
+    libion.vendor
 
 # ConsumerIR
 ifeq ($(BOARD_HAVE_IR),true)
@@ -232,6 +234,7 @@ PRODUCT_PACKAGES += \
     android.hidl.base@1.0 \
     android.hidl.base@1.0.vendor \
     android.hidl.memory@1.0.vendor \
+    libhidlmemory.vendor \
     libhidltransport \
     libhidltransport.vendor \
     libhwbinder \
@@ -357,8 +360,11 @@ PRODUCT_PACKAGES += \
     android.hardware.radio.deprecated@1.0.vendor \
     android.hardware.secure_element@1.0 \
     android.hardware.secure_element@1.0.vendor \
-    rild \
-    librmnetctl
+    libnetutils.vendor \
+    libprotobuf-cpp-full \
+    librmnetctl \
+    libsqlite.vendor:64 \
+    rild
 
 PRODUCT_PACKAGES += \
     ims-ext-common \
@@ -379,7 +385,8 @@ PRODUCT_COPY_FILES += \
 # Sensors
 PRODUCT_PACKAGES += \
     android.hardware.sensors@1.0-impl:64 \
-    android.hardware.sensors@1.0-service
+    android.hardware.sensors@1.0-service \
+    libpower.vendor
 
 # Tetheroffload
 PRODUCT_PACKAGES += \
