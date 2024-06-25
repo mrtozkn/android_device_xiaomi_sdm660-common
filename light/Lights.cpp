@@ -1,16 +1,13 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
- * Copyright (C) 2020 The LineageOS Project
- *
+ * SPDX-FileCopyrightText: 2018-2024 The LineageOS Project
  * SPDX-License-Identifier: Apache-2.0
  */
 
 // Author := dev_harsh1998, Isaac Chen
 
-#define LOG_TAG "android.hardware.light@2.0-impl.xiaomi_sdm660"
-/* #define LOG_NDEBUG 0 */
+#define LOG_TAG "LightService"
 
-#include "Light.h"
+#include "Lights.h"
 
 #include <android-base/file.h>
 #include <android-base/logging.h>
@@ -61,7 +58,7 @@ uint32_t RgbaToBrightness(uint32_t color) {
     uint32_t blue = color & 0xFF;
 
     // Scale RGB colors if a brightness has been applied by the user
-    if (alpha != 0xFF) {
+    if (alpha > 0 && alpha < 0xFF) {
         red = red * alpha / 0xFF;
         green = green * alpha / 0xFF;
         blue = blue * alpha / 0xFF;
@@ -95,13 +92,12 @@ inline bool IsLit(uint32_t color) {
 
 }  // anonymous namespace
 
+namespace aidl {
 namespace android {
 namespace hardware {
 namespace light {
-namespace V2_0 {
-namespace implementation {
 
-Light::Light() {
+Lights::Lights() {
     std::string buf;
 
     if (ReadFileToString(LCD_ATTR(max_brightness), &buf)) {
@@ -120,7 +116,7 @@ Light::Light() {
     }
 
     if (!access(BUTTON_ATTR(brightness), W_OK)) {
-        lights_.emplace(std::make_pair(Type::BUTTONS,
+        lights_.emplace(std::make_pair(LightType::BUTTONS,
                                        [this](auto&&... args) { setLightButtons(args...); }));
         buttons_.emplace_back(BUTTON_ATTR(brightness));
 
@@ -138,41 +134,48 @@ Light::Light() {
     }
 }
 
-Return<Status> Light::setLight(Type type, const LightState& state) {
+ndk::ScopedAStatus Lights::setLightState(int id, const HwLightState& state) {
+    LightType type = static_cast<LightType>(id);
+
     auto it = lights_.find(type);
 
     if (it == lights_.end()) {
-        return Status::LIGHT_NOT_SUPPORTED;
+        return ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
     }
 
     it->second(type, state);
 
-    return Status::SUCCESS;
+    return ndk::ScopedAStatus::ok();
 }
 
-Return<void> Light::getSupportedTypes(getSupportedTypes_cb _hidl_cb) {
-    std::vector<Type> types;
+ndk::ScopedAStatus Lights::getLights(std::vector<HwLight>* lights) {
+    int i = 0;
 
-    for (auto&& light : lights_) types.emplace_back(light.first);
+    for (auto&& light : lights_) {
+        HwLight hwLight;
+        hwLight.id = (int) light.first;
+        hwLight.type = light.first;
+        hwLight.ordinal = i;
+        lights->push_back(hwLight);
+        i++;
+    }
 
-    _hidl_cb(types);
-
-    return Void();
+    return ndk::ScopedAStatus::ok();
 }
 
-void Light::setLightBacklight(Type /*type*/, const LightState& state) {
+void Lights::setLightBacklight(LightType /*type*/, const HwLightState& state) {
     uint32_t brightness = RgbaToBrightness(state.color, max_screen_brightness_);
     WriteToFile(LCD_ATTR(brightness), brightness);
 }
 
-void Light::setLightButtons(Type /*type*/, const LightState& state) {
+void Lights::setLightButtons(LightType /*type*/, const HwLightState& state) {
     uint32_t brightness = RgbaToBrightness(state.color, max_button_brightness_);
     for (auto&& button : buttons_) {
         WriteToFile(button, brightness);
     }
 }
 
-void Light::setLightNotification(Type type, const LightState& state) {
+void Lights::setLightNotification(LightType type, const HwLightState& state) {
     bool found = false;
     for (auto&& [cur_type, cur_state] : notif_states_) {
         if (cur_type == type) {
@@ -180,7 +183,7 @@ void Light::setLightNotification(Type type, const LightState& state) {
         }
 
         // Fallback to battery light
-        if (!found && (cur_type == Type::BATTERY || IsLit(cur_state.color))) {
+        if (!found && (cur_type == LightType::BATTERY || IsLit(cur_state.color))) {
             found = true;
             LOG(DEBUG) << __func__ << ": type=" << toString(cur_type);
             applyNotificationState(cur_state);
@@ -188,13 +191,13 @@ void Light::setLightNotification(Type type, const LightState& state) {
     }
 }
 
-void Light::applyNotificationState(const LightState& state) {
+void Lights::applyNotificationState(const HwLightState& state) {
     uint32_t white_brightness = RgbaToBrightness(state.color, max_led_brightness_);
 
     // Turn off the leds (initially)
     WriteToFile(WHITE_ATTR(blink), 0);
 
-    if (state.flashMode == Flash::TIMED && state.flashOnMs > 0 && state.flashOffMs > 0) {
+    if (state.flashMode == FlashMode::TIMED && state.flashOnMs > 0 && state.flashOffMs > 0) {
         /*
          * If the flashOnMs duration is not long enough to fit ramping up
          * and down at the default step duration, step duration is modified
@@ -222,8 +225,7 @@ void Light::applyNotificationState(const LightState& state) {
     }
 }
 
-}  // namespace implementation
-}  // namespace V2_0
 }  // namespace light
 }  // namespace hardware
 }  // namespace android
+}  // namespace aidl
